@@ -2,8 +2,8 @@ import axios from 'axios';
 
 // Configure axios default base URL for the API.
 // NOTE: adjust the port below to match your backend API port if it's different.
-const API_PORT = 5102;
-axios.defaults.baseURL = `http://localhost:5102`;
+//const API_PORT = 5102;
+axios.defaults.baseURL = process.env.REACT_APP_API_URL
 
 // Response interceptor to log response errors centrally
 axios.interceptors.response.use(
