@@ -135,5 +135,5 @@ apiRoutes.MapDelete("/{id}", async (int id, ToDoDbContext db) =>
 
 // ============================================================
 
-app.mapGet("/", () => "Welcome to the ToDo API! Use /api/items to manage your tasks.");
+app.MapGet("/", () => "Welcome to the ToDo API! Use /api/items to manage your tasks.");
 app.Run();
