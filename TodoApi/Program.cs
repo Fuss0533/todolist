@@ -48,7 +48,7 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
-if (app.Environment.IsDevelopment())
+//if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
@@ -135,5 +135,5 @@ apiRoutes.MapDelete("/{id}", async (int id, ToDoDbContext db) =>
 
 // ============================================================
 
-
+app.mapGet("/", () => "Welcome to the ToDo API! Use /api/items to manage your tasks.");
 app.Run();
