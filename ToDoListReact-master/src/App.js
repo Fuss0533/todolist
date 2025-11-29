@@ -7,6 +7,7 @@ function App() {
 
   async function getTodos() {
     const todos = await service.getTasks();
+    console.log('Fetched todos:', todos);
     setTodos(todos);
   }
 
@@ -41,7 +42,7 @@ function App() {
       </header>
       <section className="main" style={{ display: "block" }}>
         <ul className="todo-list">
-          {todos.map(todo => {
+          {(Array.isArray(todos) ? todos : []).map(todo => {
             return (
               <li className={todo.isComplete ? "completed" : ""} key={todo.id}>
                 <div className="view">
