@@ -173,4 +173,19 @@ apiRoutes.MapDelete("/{id}", async (int id, ToDoDbContext db) =>
 app.MapGet("/", () => "Welcome to the ToDo API! Use /api/items to manage your tasks.");
 app.MapGet("/health", () => Results.Ok(new { status = "API is running", timestamp = DateTime.UtcNow }));
 
+// Test database connection
+app.MapGet("/db-test", async (ToDoDbContext db) =>
+{
+    try
+    {
+        await db.Database.OpenConnectionAsync();
+        await db.Database.CloseConnectionAsync();
+        return Results.Ok(new { status = "Database connection successful" });
+    }
+    catch (Exception ex)
+    {
+        return Results.BadRequest(new { error = ex.Message });
+    }
+});
+
 app.Run();
