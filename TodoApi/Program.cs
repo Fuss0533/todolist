@@ -127,14 +127,22 @@ apiRoutes.MapPost("/", async (Item item, ToDoDbContext db) =>
 // 3. עדכון משימה קיימת (PUT)
 apiRoutes.MapPut("/{id}", async (int id, Item inputItem, ToDoDbContext db) =>
 {
-    var itemToUpdate = await db.Items.FindAsync(id);
-    if (itemToUpdate == null)
-        return Results.NotFound();
+    try
+    {
+        var itemToUpdate = await db.Items.FindAsync(id);
+        if (itemToUpdate == null)
+            return Results.NotFound();
 
-    itemToUpdate.Name = inputItem.Name;
-    itemToUpdate.IsComplete = inputItem.IsComplete;
-    await db.SaveChangesAsync();
-    return Results.NoContent();
+        itemToUpdate.Name = inputItem.Name ?? itemToUpdate.Name;
+        itemToUpdate.IsComplete = inputItem.IsComplete;
+        await db.SaveChangesAsync();
+        return Results.NoContent();
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"Error updating item: {ex.Message}");
+        return Results.BadRequest(new { error = ex.Message, innerError = ex.InnerException?.Message });
+    }
 });
 
 // 4. מחיקת משימה (DELETE)
