@@ -92,83 +92,50 @@ app.UseCors("AllowAll");
 
 app.UseHttpsRedirection();
 
-// ========== שלב 3: מיפוי ה-Routes (נקודות הקצה) ==========
-// 
-// הוסף את כל הקוד הבא כאן, לפני השורה app.Run()
-// זה יוצר את 4 הפעולות שביקשת
-// ============================================================
+// Store items in memory for now
+var items = new List<Item>();
+var nextId = 1;
 
 // מגדיר קבוצת routes עם קידומת אחידה /api/items
 var apiRoutes = app.MapGroup("/api/items");
 
 // 1. שליפת כל המשימות (GET)
-//    HTTP Method: GET
-//    Route: /api/items/
-apiRoutes.MapGet("/", async (ToDoDbContext db) =>
+apiRoutes.MapGet("/", async () =>
 {
-    // שולף את כל הרשומות מטבלת Items ומחזיר אותן
-    return Results.Ok(await db.Items.ToListAsync());
+    return Results.Ok(items);
 });
 
 // 2. הוספת משימה חדשה (POST)
-//    HTTP Method: POST
-//    Route: /api/items/
-apiRoutes.MapPost("/", async (Item item, ToDoDbContext db) =>
+apiRoutes.MapPost("/", async (Item item) =>
 {
-    // מקבל אובייקט 'Item' מגוף הבקשה, מוסיף אותו למסד הנתונים
-    db.Items.Add(item);
-    await db.SaveChangesAsync();
-
-    // מחזיר תשובת "נוצר" (201) עם האובייקט החדש
+    item.Id = nextId++;
+    items.Add(item);
     return Results.Created($"/api/items/{item.Id}", item);
 });
 
 // 3. עדכון משימה קיימת (PUT)
-//    HTTP Method: PUT
-//    Route: /api/items/{id} (לדוגמה: /api/items/5)
-apiRoutes.MapPut("/{id}", async (int id, Item inputItem, ToDoDbContext db) =>
+apiRoutes.MapPut("/{id}", async (int id, Item inputItem) =>
 {
-    // מוצא את המשימה לפי ה-ID שקיבלנו ב-URL
-    var itemToUpdate = await db.Items.FindAsync(id);
-
-    // אם המשימה לא קיימת, מחזיר 404 Not Found
+    var itemToUpdate = items.FirstOrDefault(x => x.Id == id);
     if (itemToUpdate == null)
-    {
         return Results.NotFound();
-    }
 
-    // מעדכן את השדות של המשימה הקיימת
     itemToUpdate.Name = inputItem.Name;
     itemToUpdate.IsComplete = inputItem.IsComplete;
-
-    // שומר את השינויים
-    await db.SaveChangesAsync();
-
-    // מחזיר תשובת "אין תוכן" (204) שמסמנת הצלחה
     return Results.NoContent();
 });
 
 // 4. מחיקת משימה (DELETE)
-//    HTTP Method: DELETE
-//    Route: /api/items/{id} (לדוגמה: /api/items/5)
-apiRoutes.MapDelete("/{id}", async (int id, ToDoDbContext db) =>
+apiRoutes.MapDelete("/{id}", async (int id) =>
 {
-    // מוצא את המשימה לפי ה-ID
-    var itemToDelete = await db.Items.FindAsync(id);
-
-    // אם היא קיימת, מוחק אותה
+    var itemToDelete = items.FirstOrDefault(x => x.Id == id);
     if (itemToDelete != null)
     {
-        db.Items.Remove(itemToDelete);
-        await db.SaveChangesAsync();
-        return Results.NoContent(); // הצלחה
+        items.Remove(itemToDelete);
+        return Results.NoContent();
     }
-
-    // אם המשימה לא קיימת, מחזיר 404
     return Results.NotFound();
 });
-
-// ============================================================
 
 app.MapGet("/", () => "Welcome to the ToDo API! Use /api/items to manage your tasks.");
 app.MapGet("/health", () => Results.Ok(new { status = "API is running", timestamp = DateTime.UtcNow }));
