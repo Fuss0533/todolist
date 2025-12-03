@@ -63,9 +63,15 @@ app.Use(async (context, next) =>
     }
     catch (Exception ex)
     {
+        Console.WriteLine($"ERROR: {ex.Message}");
+        Console.WriteLine($"Stack: {ex.StackTrace}");
+        
         context.Response.StatusCode = StatusCodes.Status500InternalServerError;
         context.Response.ContentType = "application/json";
-        await context.Response.WriteAsJsonAsync(new { error = ex.Message });
+        await context.Response.WriteAsJsonAsync(new { 
+            error = ex.Message,
+            details = ex.InnerException?.Message ?? "No additional details"
+        });
     }
 });
 
