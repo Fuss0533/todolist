@@ -60,6 +60,21 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
+// Auto-migrate database on startup
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<ToDoDbContext>();
+    try
+    {
+        db.Database.Migrate();
+        Console.WriteLine("✓ Database migrated successfully");
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"Error migrating database: {ex.Message}");
+    }
+}
+
 // Exception handling middleware
 app.Use(async (context, next) =>
 {
