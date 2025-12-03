@@ -105,9 +105,23 @@ apiRoutes.MapGet("/", async (ToDoDbContext db) =>
 // 2. הוספת משימה חדשה (POST)
 apiRoutes.MapPost("/", async (Item item, ToDoDbContext db) =>
 {
-    db.Items.Add(item);
-    await db.SaveChangesAsync();
-    return Results.Created($"/api/items/{item.Id}", item);
+    try
+    {
+        // אם ה-ID הוא 0, תן לDB להגדיר את זה (auto-increment)
+        if (item.Id == 0)
+        {
+            item.Id = 0; // DB יגדיר את זה
+        }
+        
+        db.Items.Add(item);
+        await db.SaveChangesAsync();
+        return Results.Created($"/api/items/{item.Id}", item);
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"Error adding item: {ex.Message}");
+        return Results.BadRequest(new { error = ex.Message, innerError = ex.InnerException?.Message });
+    }
 });
 
 // 3. עדכון משימה קיימת (PUT)
