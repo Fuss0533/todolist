@@ -19,13 +19,17 @@ builder.Services.AddSwaggerGen();
 // ==========================================================
 
 // 1. קבל את מחרוזת החיבור לפי השם שנתת לה (ToDoDB)
-var connectionString = builder.Configuration.GetConnectionString("ToDoDB");
+// קודם כל נסה את Environment Variable, אחרי כך את appsettings
+var connectionString = Environment.GetEnvironmentVariable("DATABASE_URL") ?? 
+                       builder.Configuration.GetConnectionString("ToDoDB");
 
 // טיפול בשגיאה אם Connection String חסר
 if (string.IsNullOrEmpty(connectionString))
 {
-    throw new InvalidOperationException("Connection string 'ToDoDB' not found in configuration.");
+    throw new InvalidOperationException("Connection string 'ToDoDB' not found in configuration or DATABASE_URL environment variable.");
 }
+
+Console.WriteLine($"Using connection string starting with: {connectionString.Substring(0, Math.Min(50, connectionString.Length))}...");
 
 // 2. הזרק את ה-DbContext לשירותים
 builder.Services.AddDbContext<ToDoDbContext>(options =>
