@@ -39,9 +39,9 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAll", policy =>
     {
-        policy.AllowAnyOrigin()
-              .AllowAnyMethod()
-              .AllowAnyHeader();
+       policy.WithOrigins("https://todolist-4pyv.onrender.com") // הגדרה ספציפית לדומיין הקליינט
+              .AllowAnyHeader()
+              .AllowAnyMethod();
     });
 });
 // =====================================
