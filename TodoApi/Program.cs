@@ -21,6 +21,12 @@ builder.Services.AddSwaggerGen();
 // 1. קבל את מחרוזת החיבור לפי השם שנתת לה (ToDoDB)
 var connectionString = builder.Configuration.GetConnectionString("ToDoDB");
 
+// טיפול בשגיאה אם Connection String חסר
+if (string.IsNullOrEmpty(connectionString))
+{
+    throw new InvalidOperationException("Connection string 'ToDoDB' not found in configuration.");
+}
+
 // 2. הזרק את ה-DbContext לשירותים
 builder.Services.AddDbContext<ToDoDbContext>(options =>
     // 3. הגדר אותו להשתמש ב-MySQL עם מחרוזת החיבור
@@ -47,6 +53,21 @@ builder.Services.AddCors(options =>
 // =====================================
 
 var app = builder.Build();
+
+// Exception handling middleware
+app.Use(async (context, next) =>
+{
+    try
+    {
+        await next();
+    }
+    catch (Exception ex)
+    {
+        context.Response.StatusCode = StatusCodes.Status500InternalServerError;
+        context.Response.ContentType = "application/json";
+        await context.Response.WriteAsJsonAsync(new { error = ex.Message });
+    }
+});
 
 // Enable CORS FIRST
 app.UseCors("AllowAll");
