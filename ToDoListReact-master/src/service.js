@@ -34,7 +34,7 @@ export default {
   // Uses PUT to update resource.
   setCompleted: async (id, isComplete) => {
     console.log('setCompleted', { id, isComplete });
-    const payload = { isComplete: !!isComplete };
+    const payload = { name: '', isComplete: !!isComplete };
     const result = await axios.put(`/api/items/${id}`, payload);
     return result.data;
   },
