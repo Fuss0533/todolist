@@ -54,7 +54,7 @@ var app = builder.Build();
     app.UseSwaggerUI();
 }
 
-app.UseHttpsRedirection();
+//app.UseHttpsRedirection();
 app.UseCors("AllowAll");
 
 // ========== שלב 3: מיפוי ה-Routes (נקודות הקצה) ==========
