@@ -92,50 +92,50 @@ app.UseCors("AllowAll");
 
 app.UseHttpsRedirection();
 
-// Store items in memory for now
-var items = new List<Item>();
-var nextId = 1;
-
+// ========== שלב 3: מיפוי ה-Routes (נקודות הקצה) ==========
 // מגדיר קבוצת routes עם קידומת אחידה /api/items
 var apiRoutes = app.MapGroup("/api/items");
 
 // 1. שליפת כל המשימות (GET)
-apiRoutes.MapGet("/", async () =>
+apiRoutes.MapGet("/", async (ToDoDbContext db) =>
 {
-    return Results.Ok(items);
+    return Results.Ok(await db.Items.ToListAsync());
 });
 
 // 2. הוספת משימה חדשה (POST)
-apiRoutes.MapPost("/", async (Item item) =>
+apiRoutes.MapPost("/", async (Item item, ToDoDbContext db) =>
 {
-    item.Id = nextId++;
-    items.Add(item);
+    db.Items.Add(item);
+    await db.SaveChangesAsync();
     return Results.Created($"/api/items/{item.Id}", item);
 });
 
 // 3. עדכון משימה קיימת (PUT)
-apiRoutes.MapPut("/{id}", async (int id, Item inputItem) =>
+apiRoutes.MapPut("/{id}", async (int id, Item inputItem, ToDoDbContext db) =>
 {
-    var itemToUpdate = items.FirstOrDefault(x => x.Id == id);
+    var itemToUpdate = await db.Items.FindAsync(id);
     if (itemToUpdate == null)
         return Results.NotFound();
 
     itemToUpdate.Name = inputItem.Name;
     itemToUpdate.IsComplete = inputItem.IsComplete;
+    await db.SaveChangesAsync();
     return Results.NoContent();
 });
 
 // 4. מחיקת משימה (DELETE)
-apiRoutes.MapDelete("/{id}", async (int id) =>
+apiRoutes.MapDelete("/{id}", async (int id, ToDoDbContext db) =>
 {
-    var itemToDelete = items.FirstOrDefault(x => x.Id == id);
+    var itemToDelete = await db.Items.FindAsync(id);
     if (itemToDelete != null)
     {
-        items.Remove(itemToDelete);
+        db.Items.Remove(itemToDelete);
+        await db.SaveChangesAsync();
         return Results.NoContent();
     }
     return Results.NotFound();
 });
+// ============================================================
 
 app.MapGet("/", () => "Welcome to the ToDo API! Use /api/items to manage your tasks.");
 app.MapGet("/health", () => Results.Ok(new { status = "API is running", timestamp = DateTime.UtcNow }));
