@@ -39,7 +39,7 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAll", policy =>
     {
-       policy.WithOrigins("https://todolist-4pyv.onrender.com") // הגדרה ספציפית לדומיין הקליינט
+       policy.AllowAnyOrigin()
               .AllowAnyHeader()
               .AllowAnyMethod();
     });
@@ -48,14 +48,16 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
+// Enable CORS FIRST
+app.UseCors("AllowAll");
+
 //if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
 
-//app.UseHttpsRedirection();
-app.UseCors("AllowAll");
+app.UseHttpsRedirection();
 
 // ========== שלב 3: מיפוי ה-Routes (נקודות הקצה) ==========
 // 
